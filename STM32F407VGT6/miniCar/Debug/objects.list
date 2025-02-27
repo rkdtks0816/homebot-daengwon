@@ -1,4 +1,0 @@
-"./main.o"
-"./startup_stm32f407vgtx.o"
-"./syscalls.o"
-"./sysmem.o"
