@@ -1,88 +1,114 @@
-### **1. 프로젝트 배경**  
-> 전기차 기술은 차량 산업의 핵심이며, 안전성과 신뢰성을 보장하기 위한 소프트웨어 아키텍처와 하드웨어 통합은 필수적인 요소입니다. 특히, **AUTOSAR(AUTomotive Open System Architecture)**는 차량 소프트웨어 개발의 표준으로 자리 잡고 있어, 이를 학습하고 적용하는 것이 중요합니다.
+# RC_Car_Project 개발 환경 및 설정 (WSL 기반)
 
-- 본 프로젝트는 **STM32, ESP32, CAN 통신, 모터 드라이버, 초음파 센서** 등을 활용하여 실제 전기차 시스템의 축소판인 RC카를 개발하고, 차량 소프트웨어 플랫폼 설계와 구현 경험을 목표로 하고 있습니다.
-
----
-
-### **2. 프로젝트 목표**  
-1. **차량 소프트웨어 플랫폼 설계 및 구현 학습**  
-   - AUTOSAR 구조를 기반으로 MCAL, BSW, RTE, SWC의 일부 계층을 설계하고 구현.  
-2. **CAN 통신을 통한 안정적인 데이터 교환**  
-   - STM32와 ESP32 간 CAN 네트워크를 구성하여 모듈 간 명확한 데이터 송수신 구현.  
-3. **모터 및 센서 제어**  
-   - 서보모터와 DC 모터를 제어하여 주행과 조향 기능을 안정적으로 구현.  
-   - 초음파 센서를 활용해 장애물을 감지하고 주행 경로를 동적으로 조정.  
-4. **실시간 운영체제 기반 시스템 관리**  
-   - FreeRTOS를 활용한 태스크 스케줄링 및 실시간성 보장.  
-5. **전원 효율성 설계**  
-   - 18650 배터리를 활용한 안정적이고 효율적인 전력 공급 구조 설계.
+## 개요
+RC_Car_Project는 STM32F407G-DISC1과 ESP32를 활용하여 CAN 기반으로 동작하는 RC카 시스템입니다. 이 문서는 WSL 기반의 개발 환경 설정과 프로젝트 폴더 구조를 포함하여 정리합니다.
 
 ---
 
-### **3. 개발 목표 및 기능**  
-1. **주행 및 조향 시스템 구현**  
-   - 서보모터로 전륜 조향 제어.  
-   - DC 모터를 활용해 후륜 구동 및 속도 제어.  
-2. **CAN 통신 기반 데이터 송수신**  
-   - STM32와 ESP32 간 주행 명령, 상태 정보 송수신.  
-3. **장애물 감지 및 회피**  
-   - 초음파 센서를 이용해 장애물 거리 측정 및 회피 경로 생성.  
-4. **RTOS 기반 태스크 관리**  
-   - 장애물 감지, 통신 관리, 주행 제어 등 주요 기능을 태스크로 분리하여 실시간 운영.  
-5. **전원 설계 및 효율적 분배**  
-   - 18650 배터리를 활용한 서보모터, DC 모터, ESP32의 전력 공급 및 안정화.
+## 1. 개발 환경 설정
+### 1.1 필수 도구 설치
+RC_Car_Project 개발을 위한 필수적인 소프트웨어를 설치해야 합니다.
+
+- **WSL2 (Ubuntu 24.04.02 LTS)**
+- **VSCode (1.97.2)**: 코드 편집 및 디버깅 도구
+- **GCC ARM Toolchain (STM32 및 ESP32 개별 사용)**: Bare-metal 환경에서 직접 빌드
+- **OpenOCD**: 디버깅을 위한 오픈소스 도구
+
+### 1.2 WSL2 기반 GCC Toolchain 설치
+1. WSL2 Ubuntu 환경에서 [ARM GNU Toolchain](https://developer.arm.com/downloads/-/gnu-rm) 최신 버전을 다운로드합니다.
+2. 환경 변수 설정:
+   ```sh
+   echo 'export PATH=$PATH:/opt/gcc-arm-none-eabi/bin' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+3. `arm-none-eabi-gcc --version`을 실행하여 정상 설치 여부를 확인합니다.
+
+### 1.3 OpenOCD 설치 및 설정
+1. WSL2에서 OpenOCD를 설치합니다.
+   ```sh
+   sudo apt install openocd
+   ```
+2. 보드와 PC를 USB로 연결한 후, WSL2가 USB 장치를 인식하도록 설정합니다.
+   ```sh
+   usbipd wsl attach --busid <BUSID>
+   ```
+3. `openocd -f interface/stlink.cfg -f target/stm32f4x.cfg` 명령으로 연결을 확인합니다.
 
 ---
 
-### **4. 프로젝트 일정**  
-- **설계 단계**: 2025.01.15 \~ 2025.01.20  
-  - AUTOSAR 기반 구조 설계 및 하드웨어 구성 설계.  
-- **개발 단계**: 2025.01.21 \~ 2025.02.10  
-  - STM32와 ESP32 소프트웨어 개발, CAN 통신 구현, RTOS 기반 태스크 관리 개발.  
-  - 모터 드라이버 및 센서 제어 코드 작성.  
-- **테스트 및 통합 단계**: 2025.02.11 \~ 2025.02.14  
-  - 장애물 감지, 조향, 주행 기능 통합 테스트.  
+## 2. 프로젝트 디렉토리 구조
+```bash
+📂 RC_Car_Project/
+│── 📂 STM32F4_DISCOVERY/     → STM32 관련 코드
+│   │── 📂 Core/               → 메인 코드 및 공통 유틸리티
+│   │   │── main.c             → 메인 코드 (RTOS 스케줄러 실행)
+│   │   │── startup_stm32.s    → 스타트업 코드 (어셈블리)
+│   │   │── system_stm32f4xx.c → 시스템 초기화 코드
+│   │
+│   │── 📂 Drivers/            → 레지스터 기반 드라이버 코드
+│   │   │── gpio_driver.c      → GPIO 드라이버 (모터 방향 제어)
+│   │   │── pwm_driver.c       → PWM 드라이버 (DC 모터, 서보모터)
+│   │   │── uart_driver.c      → UART 드라이버 (디버깅, BLE)
+│   │   │── can_driver.c       → CAN 드라이버 (STM32 ↔ ESP32 통신)
+│   │
+│   │── 📂 RTOS/               → 직접 구현한 RTOS 코드
+│   │   │── rtos.c             → RTOS 커널 (태스크 스케줄링)
+│   │   │── task_scheduler.c   → 태스크 관리
+│   │   │── semaphore.c        → 세마포어 및 동기화 관리
+│   │
+│   │── 📂 Peripherals/        → 센서 및 액추에이터 제어 코드
+│   │   │── motor_control.c    → DC 모터 및 서보모터 제어
+│   │   │── ultrasonic_sensor.c→ 초음파 센서 (HC-SR04)
+│   │   │── camera_module.c    → 카메라 모듈 (ESP32-CAM)
+│   │
+│   │── 📂 Communication/      → 통신 관련 코드
+│   │   │── ble_controller.c   → BLE 컨트롤러 (MOGA XP5)
+│   │   │── can_protocol.c     → CAN 메시지 송수신
+│   │
+│   │── 📂 Config/             → 환경 설정 및 매크로 정의
+│   │   │── config.h           → 시스템 설정 (주파수, 클럭 등)
+│   │   │── pin_mapping.h      → 핀 매핑 정의
+│
+│── 📂 ESP32/                  → ESP32 관련 코드
+│   │── 📂 Core/               → 메인 코드
+│   │   │── main.cpp           → ESP32 실행 코드
+│   │
+│   │── 📂 Communication/      → 통신 관련 코드 (BLE, CAN)
+│   │   │── ble_handler.cpp    → BLE 데이터 처리
+│   │   │── can_handler.cpp    → CAN 메시지 처리
+│   │
+│   │── 📂 Sensors/            → 센서 데이터 처리
+│   │   │── ultrasonic.cpp     → 초음파 센서 데이터 전송
+│   │   │── camera.cpp         → ESP32-CAM 처리
+│
+│── 📂 Docs/                   → 문서 및 설명
+│   │── README.md              → 프로젝트 설명
+│   │── Circuit_Diagram.pdf     → 회로도
+│
+│── 📂 Tests/                  → 단위 테스트 코드
+│   │── test_motor.c           → 모터 제어 테스트
+│   │── test_ble.c             → BLE 입력 테스트
+│   │── test_can.c             → CAN 통신 테스트
+```
 
 ---
 
-### **5. 하드웨어 구성**
-- **MCU 및 통신**:  
-  - STM32F407 Discovery Kit: 중앙 제어 ECU.  
-  - ESP32: 모터 제어 ECU.  
-  - SN65HVD230: CAN 트랜시버.  
-
-- **모터 및 센서**:  
-  - 서보모터: 앞바퀴 조향 제어.  
-  - DC 모터(DRV8833 모터 드라이버): 뒷바퀴 구동.  
-  - 초음파 센서(HC-SR04): 장애물 거리 측정.  
-
-- **전원 공급**:  
-  - 18650 배터리(5V 출력).  
+## 3. 빌드 및 플래싱 (WSL2)
+```sh
+make clean   # 기존 빌드 파일 삭제
+make         # 프로젝트 빌드
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program firmware.elf verify reset exit"
+```
 
 ---
 
-### **6. 프로젝트 사용 기술**  
-- **프로그래밍 언어**: C, C++ (STM32, ESP32).  
-- **AUTOSAR 구조 적용**:  
-  - MCAL: GPIO, CAN 드라이버.  
-  - BSW: CAN 통신 스택.  
-  - RTE: 데이터 교환 및 제어.  
-  - SWC: 주행 제어 및 장애물 감지 로직.  
-- **운영체제 및 통신 프로토콜**:  
-  - RTOS 기반 태스크 관리.  
-  - CAN (STM32 ↔ ESP32).  
+## 4. 추가 자료
+- [STM32F407G-DISC1 공식 문서](https://www.st.com/en/evaluation-tools/stm32f4discovery.html)
+- [ARM GCC Toolchain Documentation](https://developer.arm.com/downloads/-/gnu-rm)
+- [OpenOCD User Guide](http://openocd.org/doc-release/html/index.html)
+- [WSL2에서 USB 장치 연결](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
 
 ---
 
-### **7. 기대 효과**  
-1. **차량 소프트웨어 플랫폼 설계 역량 강화**  
-   - AUTOSAR 구조 기반 설계 및 구현 경험을 통해 실제 차량 소프트웨어 플랫폼 개발에 필요한 역량을 강화.  
-2. **CAN 통신 및 RTOS 실무 경험 축적**  
-   - 차량 네트워크에서 중요한 CAN 통신과 RTOS 기반 시스템 설계 및 구현 역량 습득.  
-3. **임베디드 시스템 개발 역량 강화**  
-   - STM32와 ESP32를 활용하여 실질적인 하드웨어 및 소프트웨어 통합 경험 확보.  
-4. **기능안전 및 신뢰성 설계 학습**  
-   - 장애 상황 복구, Fail-safe 설계 등 신뢰성 높은 시스템 개발 경험 습득.  
+이 문서는 WSL2 기반(우분투 24.04.02 LTS)에서 STM32F407G-DISC1과 ESP32를 활용한 Bare-Metal 환경에서 GCC Toolchain을 각각 사용하여 진행하는 펌웨어 개발을 위해 작성되었습니다. 지속적으로 업데이트될 예정입니다.
 
----
