@@ -1,0 +1,4 @@
+# ninja log v5
+1	58	1740668686532250006	CMakeFiles/my_project.dir/cmsis_device_f4/Source/Templates/system_stm32f4xx.c.o	b4f016a189fcd9c3
+1	60	1740668686542251904	CMakeFiles/my_project.dir/main.c.o	bd99fa5252349e34
+60	105	1740668686582259507	my_project.elf	a89541981c3ac577
