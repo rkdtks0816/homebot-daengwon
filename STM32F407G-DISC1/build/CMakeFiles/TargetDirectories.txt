@@ -1,3 +1,0 @@
-/home/song/my-tiny-ev/STM32F407G-DISC1/build/CMakeFiles/my_project.dir
-/home/song/my-tiny-ev/STM32F407G-DISC1/build/CMakeFiles/edit_cache.dir
-/home/song/my-tiny-ev/STM32F407G-DISC1/build/CMakeFiles/rebuild_cache.dir
