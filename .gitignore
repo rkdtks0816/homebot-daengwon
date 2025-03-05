@@ -1,0 +1,9 @@
+# 빌드 결과물 제외
+Build/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.log
+*.out
