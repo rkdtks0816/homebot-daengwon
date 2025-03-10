@@ -1,53 +1,86 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
+project(STM32F4_VCU C ASM)
 
-# 프로젝트 설정
-project(STM32_BareMetal C ASM)
-
-# CPU 및 컴파일러 설정
+# ARM Cross Compiler 설정
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-# 툴체인 설정 (GCC ARM)
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
 
-# 빌드 타입 설정
-set(CMAKE_BUILD_TYPE Release)
+# MCU 옵션 설정
+set(MCU_FLAGS "-mcpu=cortex-m4 -mthumb -mfloat-abi=soft -Wall -g -nostartfiles -specs=nano.specs")
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/linker/STM32F407VGTX_FLASH.ld")
 
-# 링커 스크립트 설정 (파일 경로 확인)
-set(STM32F4_LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/linker.ld)
-if(NOT EXISTS ${STM32F4_LINKER_SCRIPT})
-    message(FATAL_ERROR "링커 스크립트가 존재하지 않습니다: ${STM32F4_LINKER_SCRIPT}")
-endif()
+# 빌드 플래그
+set(CMAKE_C_FLAGS "${MCU_FLAGS} -ffunction-sections -fdata-sections -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_C_FLAGS} -T ${LINKER_SCRIPT}")
 
-# 소스 파일 추가
-file(GLOB SRC_FILES
-    ${CMAKE_SOURCE_DIR}/Core/*.c
-    ${CMAKE_SOURCE_DIR}/Core/*.s
+# Include 디렉토리 추가
+include_directories(
+    Core/Inc
+    MCAL
+    BSW
+    RTE
+    APP
+    Drivers
+    Drivers/CMSIS/Include
+    Drivers/CMSIS/Device/ST/STM32F4xx/Include
+    Drivers/STM32F4xx_HAL_Driver/Inc
+    Middlewares/FreeRTOS/include
+    Middlewares/FreeRTOS/portable/GCC/ARM_CM4F
 )
 
-# 실행 파일 생성
-add_executable(stm32_project.elf ${SRC_FILES})
+# 소스 코드 추가
+add_executable(stm32_vcu_drive_ecu
+    # Core
+    Core/Src/main.c
+    Core/Inc
+    Core/Inc/stm32f4xx_hal_conf.h
+    # Core/Src/can_manager.c
+    # Core/Src/motor_control.c
+    # Core/Src/servo_control.c
+    # Core/Src/sensors.c
+    
+    # # MCAL (Microcontroller Abstraction Layer)
+    # MCAL/pwm_driver.c
+    # MCAL/can_driver.c
+    # MCAL/gpio_driver.c
 
-# 링커 스크립트 적용 (강제 설정)
-target_link_options(stm32_project.elf PRIVATE
-    -T${STM32F4_LINKER_SCRIPT}
-    -Wl,-Map=output.map
-    -Wl,--gc-sections
-    -nostartfiles
-    -ffreestanding
-    -Wl,--oformat=elf32-littlearm
+    # # BSW (Basic Software)
+    # BSW/can_service.c
+    # BSW/motor_service.c
+
+    # # RTE (Runtime Environment)
+    # RTE/rte_interface.c
+
+    # # APP (Application Layer)
+    # APP/vehicle_control.c
+    # APP/obstacle_avoidance.c
+
+    # HAL (Hardware Abstraction Layer)
+    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
+    Drivers/STM32F4xx_HAL_Driver/Inc
+
+    # FreeRTOS Kernel
+    Middlewares/FreeRTOS/Source/event_groups.c
+    Middlewares/FreeRTOS/Source/list.c
+    Middlewares/FreeRTOS/Source/queue.c
+    Middlewares/FreeRTOS/Source/tasks.c
+    Middlewares/FreeRTOS/Source/timers.c
+
+    # FreeRTOS 포팅 및 Heap 관리
+    Middlewares/FreeRTOS/portable/GCC/ARM_CM4F/port.c
+    Middlewares/FreeRTOS/portable/MemMang/heap_4.c
+    Middlewares/FreeRTOS/include
+
+    # 스타트업 코드
+    startup/startup_stm32f407vgtx.s
 )
 
-# 최적화 및 컴파일 옵션
-target_compile_options(stm32_project.elf PRIVATE
-    -mcpu=cortex-m4
-    -mthumb
-    -Wall
-    -O2
-)
-
-# 인클루드 디렉토리 추가
-target_include_directories(stm32_project.elf PRIVATE
-    ${CMAKE_SOURCE_DIR}/Core
-)
+# 링커 추가
+target_link_libraries(stm32_vcu_drive_ecu m c nosys)

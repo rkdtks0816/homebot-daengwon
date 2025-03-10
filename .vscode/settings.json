@@ -1,4 +1,8 @@
 {
     "idf.portWin": "COM7",
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "files.associations": {
+        "task.h": "c",
+        "stm32f4xx_hal_def.h": "c"
+    }
 }
