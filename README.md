@@ -1,110 +1,103 @@
-# 나의 조그만 전기차
+# 🐶 반려 로봇 댕원 (Dangwon Robot)
 
-**"나의 조그만 전기차"** 프로젝트는 STM32와 ESP32 기반의 임베디드 시스템을 활용하여 전기차의 축소판을 개발하는 프로젝트입니다. CAN 통신을 통해 여러 ECU를 연동하고, 주행 및 장애물 감지 기능을 구현합니다.
-
-## 📌 프로젝트 개요
-
-- **목표**: 실차 아키텍처와 유사한 임베디드 시스템을 개발하여 차량용 소프트웨어 설계 및 CAN 통신 경험 습득
-- **주요 기능**:
-  - DC 모터 및 서보모터를 이용한 주행 및 조향 제어
-  - 초음파 센서 및 카메라를 활용한 장애물 감지
-  - CAN 프로토콜을 통한 ECU 간 데이터 송수신
-  - BLE 컨트롤러를 통한 원격 제어
-- **사용 기술**:
-  - **MCU**: STM32F407, ESP32-WROOM-32D, ESP32-CAM
-  - **통신**: CAN(SN65HVD230), BLE
-  - **운영체제**: FreeRTOS(ESP32), Bare-metal(STM32)
-  - **전원**: 18650 배터리(3개), DC-DC 다운 컨버터
-
-## 📂 프로젝트 폴더 구조
-
-```
-📁 my_small_ev_project (프로젝트 루트)
-├── 📁 stm32_vcu_drive_ecu (VCU + Drive ECU, STM32)
-│   ├── 📁 Core (메인 코드)
-│   ├── 📁 MCAL (하드웨어 추상화 계층)
-│   ├── 📁 BSW (기본 소프트웨어 계층)
-│   ├── 📁 RTE (런타임 환경)
-│   ├── 📁 APP (애플리케이션 계층)
-│   ├── 📁 Drivers (STM32 드라이버 코드)
-│   ├── 📁 Middlewares (추가 라이브러리)
-│   ├── 📁 Build (빌드 결과물)
-│
-├── 📁 esp32_sensor_ecu (센서 ECU, ESP32-CAM)
-│   ├── 📁 src (소스 코드)
-│   ├── 📁 include (헤더 파일)
-│   ├── 📁 drivers (드라이버)
-│   ├── 📁 Build (빌드 결과물)
-│
-├── 📁 esp32_controller_ecu (컨트롤러 ECU, ESP32)
-│   ├── 📁 src (소스 코드)
-│   ├── 📁 include (헤더 파일)
-│   ├── 📁 drivers (드라이버)
-│   ├── 📁 Build (빌드 결과물)
-│
-├── 📁 shared (공통 코드)
-│   ├── 📁 CAN_protocol (CAN 메시지 정의)
-│   ├── 📁 Utils (공용 유틸리티 코드)
-│
-├── 📁 docs (프로젝트 문서)
-├── 📁 scripts (자동화 스크립트)
-├── 📁 configs (설정 파일)
-├── README.md (프로젝트 개요)
-```
-
-## 🛠️ 개발 환경 설정
-
-### 1️⃣ 필수 도구 설치
-- **Toolchain**
-  - STM32: GNU Arm Embedded Toolchain, OpenOCD, GDB
-  - ESP32: ESP-IDF, Xtensa GCC Toolchain
-- **IDE**: VSCode + PlatformIO / STM32CubeIDE (선택 사항)
-- **Python 스크립트 실행 환경**: `Python 3.x`, `pip install -r scripts/requirements.txt`
-
-### 2️⃣ 빌드 및 플래싱
-
-#### 🏎️ STM32 (VCU + Drive ECU)
-```bash
-cd stm32_vcu_drive_ecu
-make flash  # OpenOCD를 사용하여 플래싱
-```
-
-#### 📡 ESP32 (센서 ECU)
-```bash
-cd esp32_sensor_ecu
-idf.py build flash monitor
-```
-
-#### 🎮 ESP32 (컨트롤러 ECU)
-```bash
-cd esp32_controller_ecu
-idf.py build flash monitor
-```
-
-## 📡 CAN 통신 메시지 정의
-
-| ID | 송신 ECU | 수신 ECU | 데이터 | 설명 |
-|----|---------|---------|--------|------|
-| 0x100 | Controller ECU | VCU | `0x01`~`0x04` | 조향 및 속도 제어 |
-| 0x200 | Sensor ECU | VCU | 거리 값 (`cm`) | 장애물 감지 |
-| 0x300 | VCU | Controller ECU | 상태 정보 | 모터 상태 |
-
-## 🚀 실행 방법
-1. 배터리 연결 후 전원 공급
-2. ESP32 및 STM32에 각각 펌웨어 업로드
-3. 컨트롤러 ECU(BLE)와 게임패드 연결 후 조작
-4. 센서 ECU에서 장애물 감지 후 CAN 메시지 전송
-5. VCU에서 주행 제어 후 모터 동작 확인
-
-## 🔥 이슈 및 개선 사항
-- 📌 CAN 메시지 최적화 및 오류 처리 로직 추가 예정
-- 📌 ROS2 기반 원격 모니터링 기능 추가 검토 중
-- 📌 전력 소비 최적화 및 배터리 효율 개선
-
-## 📜 라이선스
-본 프로젝트는 **MIT 라이선스** 하에 배포됩니다.
+> 집안을 자율적으로 돌아다니며 사람과 교감하는 반려 로봇을 목표로 하는 임베디드 학습 기반 프로젝트
 
 ---
 
-추가 문의 또는 기여를 원하시면 [GitHub Issues](https://github.com/)에 남겨주세요! 🚗💨
+## 📌 프로젝트 소개
 
+**반려 로봇 댕원**은 단순한 RC카 구현을 넘어, 실무에서 요구되는 임베디드 시스템의 구조와 개발 프로세스를 기반부터 체계적으로 학습하는 프로젝트입니다.  
+장기적으로는 자율 주행 기능과 로봇팔 제어 기능을 포함한 반려형 로봇을 개발하는 것이 목표입니다.
+
+---
+
+## 🚗 시스템 아키텍처
+
+- **MCU 구성**
+  - STM32F407VGT6: VCU + Drive ECU
+  - ESP32-WROOM-32D: 컨트롤러 ECU, 센서 ECU
+  - ESP32-CAM: 영상 처리 ECU
+
+- **센서 및 제어 구성**
+  - HC-SR04 초음파 센서
+  - 서보모터 (조향 제어)
+  - DC 기어드 모터 + 엔코더 (후륜 구동)
+  - DRV8833 모터 드라이버
+  - BLE + CAN 통신
+
+- **전원 구성**
+  - 18650 배터리 3개 직렬 (12.6V)
+  - DC-DC Step Down Converter (5V/5A)
+
+---
+
+## 🧱 폴더 구조
+
+```plaintext
+📁 my_small_ev_project
+├── stm32_vcu_drive_ecu         # STM32 기반 VCU + Drive ECU
+├── esp32_sensor_ecu            # ESP32 기반 센서 ECU
+├── esp32_controller_ecu        # ESP32 기반 컨트롤러 ECU
+├── shared                      # 공용 라이브러리 및 유틸리티
+│   ├── CAN_protocol            # 메시지 ID 정의 등
+│   └── Utils                   # 공통 유틸 함수
+├── docs                        # 시스템 설계, 문서, BOM 등
+├── scripts                     # 빌드, 플래싱 자동화 스크립트
+├── configs                     # 설정 파일
+└── README.md
+```
+
+---
+
+## 🛠 사용 기술
+
+- **Firmware**
+  - STM32CubeMX + HAL + FreeRTOS
+  - ESP-IDF + FreeRTOS
+
+- **통신**
+  - CAN (SN65HVD230 트랜시버)
+  - BLE (ESP32 내장)
+
+- **개발 환경**
+  - STM32CubeIDE
+  - VSCode + GCC Toolchain + OpenOCD
+
+---
+
+## ✅ 개발 단계
+
+| 단계 | 내용 | 상태 |
+|------|------|------|
+| 1. 설계 | 요구사항 정의, V-Model 기반 설계, 시스템 아키텍처 수립 | ✅ 완료 |
+| 2. 개발 환경 구축 | STM32/ESP32 빌드 및 디버깅 환경 설정 | ✅ 완료 |
+| 3. RC카 기본 구현 | 조향, 주행 제어, 센서 연동 | ⏳ 진행 중 |
+| 4. 자율주행 기능 | 초음파 기반 장애물 회피, 라인 추종 | ⬜ 예정 |
+| 5. 로봇팔 구현 | 서보 기반 조작 기능 구현 | ⬜ 예정 |
+
+---
+
+## 📷 주요 기능
+
+- 실시간 태스크 제어 (FreeRTOS)
+- CAN 기반 센서-제어 메시지 전송
+- BLE를 이용한 디버깅용 스마트폰 연동
+- 우선순위 조정 및 병목 해소를 통한 지연 개선
+
+---
+
+## 📎 문서
+
+- 시스템 설계 문서
+- HSI/HSR, BOM 리스트
+- 테스트 로그 및 회고 문서 등 `docs/` 폴더 참고
+
+---
+
+## 📌 목표
+
+- 실무 임베디드 개발 프로세스 경험
+- RTOS 기반 구조 설계 및 제어 최적화
+- 자율주행 + 로봇팔 기능 통합 시스템 완성
+
+---
